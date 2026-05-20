@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import AdminDashboard from "./AdminDashboard";
+import DoctorDashboard from "./DoctorDashboard";
+import PatientDashboard from "./PatientDashboard";
+
 function Dashboard() {
     const navigate = useNavigate();
 
@@ -14,18 +18,17 @@ function Dashboard() {
 
     return (
         <div>
-            <h2>Dashboard</h2>
+            <button onClick={handleLogout}>Logout</button>
 
-            {user ? (
-                <>
-                    <p>Welcome, {user.name}</p>
-                    <p>Email: {user.email}</p>
-                    <p>Role: {user.role}</p>
+            {role === "admin" && <AdminDashboard />}
+            {role === "doctor" && <DoctorDashboard />}
+            {role === "patient" && <PatientDashboard />}
 
-                    <button onClick={handleLogout}>Logout</button>
-                </>
-            ) : (
-                    <p>No user logged in</p>
+            {!role && (
+                <div>
+                    <h1>No role found</h1>
+                    <p>Please login again.</p>
+                </div>
             )}
         </div>
     );
