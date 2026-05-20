@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import AdminDashboard from "./AdminDashboard";
 import DoctorDashboard from "./DoctorDashboard";
 import PatientDashboard from "./PatientDashboard";
+import Navbar from "../components/Navbar";
 
 function Dashboard() {
     const navigate = useNavigate();
@@ -19,6 +20,7 @@ function Dashboard() {
 
     return (
         <div>
+            <Navbar />
             <h2>Clinic Management System</h2>
 
             <p>Welcome, {user?.name}</p>
