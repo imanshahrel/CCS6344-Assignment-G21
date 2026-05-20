@@ -9,6 +9,7 @@ function Dashboard() {
     const navigate = useNavigate();
 
     const user = JSON.parse(localStorage.getItem("user"));
+    const role = user?.role;
 
     const handleLogout = () => {
         localStorage.removeItem("token");
@@ -18,8 +19,15 @@ function Dashboard() {
 
     return (
         <div>
+            <h2>Clinic Management System</h2>
+
+            <p>Welcome, {user?.name}</p>
+            <p>Role: {role}</p>
+
             <button onClick={handleLogout}>Logout</button>
 
+            <hr />
+            
             {role === "admin" && <AdminDashboard />}
             {role === "doctor" && <DoctorDashboard />}
             {role === "patient" && <PatientDashboard />}
