@@ -1,6 +1,8 @@
 require("dotenv").config();
 
 const express = require("express");
+
+// backend permission for browser (security purpose)
 const cors = require("cors");
 
 const db = require("./config/db");
