@@ -25,6 +25,7 @@ function Login() {
         try {
             const res = await axios.post("http://localhost:5000/api/users/login", formData);
 
+            // save both the token and user role correctly
             localStorage.setItem("token", res.data.token);
             localStorage.setItem("user", JSON.stringify(res.data.user));
 
