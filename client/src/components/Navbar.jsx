@@ -16,6 +16,9 @@ function Navbar() {
                     <Link to="/dashboard">Dashboard</Link>
                 </li>
                 <li>
+                    <Link to="/book-appointment">Book Appointment</Link>
+                </li>
+                <li>
                     <Link to="/appointments">Appointments</Link>
                 </li>
                 <li>
