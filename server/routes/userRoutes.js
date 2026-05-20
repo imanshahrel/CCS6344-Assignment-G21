@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/userController");
-const { verifyToken } = require("../middleware/authMiddleware");
+const { verifyToken, verifyAdmin } = require("../middleware/authMiddleware");
 
 router.post("/register", userController.registerUser);
 router.post("/login", userController.loginUser);
@@ -14,4 +14,11 @@ router.get("/profile", verifyToken, (req, res) => {
     });
 });
 
+// admin only route
+router.get("/admin", verifyToken, verifyAdmin, (req, res) => {
+    res.json({
+        message: "Welcome admin. Access granted.",
+        user: req.user
+    });
+});
 module.exports = router;

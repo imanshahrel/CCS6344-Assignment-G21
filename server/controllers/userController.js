@@ -13,6 +13,22 @@ exports.registerUser = async (req, res) => {
         });
     }
 
+    // check email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({
+            message: "Invalid email format"
+        });
+    }
+
+    // check password length
+    if (password.length < 6) {
+        return res.status(400).json({
+            message: "Password must be at least 6 characters"
+        });
+    }
+
     try {
         // check existing email
         const checkSql = "SELECT * FROM users WHERE email = ?";
@@ -31,10 +47,10 @@ exports.registerUser = async (req, res) => {
                 });
             }
 
-            // hash password
+            // hash password before storing in db
             const hashedPassword = await bcrypt.hash(password, 10);
 
-            // insert user
+            // insert user into mysql
             const insertSql =
                 "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)";
 
@@ -74,7 +90,17 @@ exports.loginUser = async (req, res) => {
         });
     }
 
+    // check email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({
+            message: "Invalid email format"
+        });
+    }
+
     try {
+        // find user by email
         const sql = "SELECT * FROM users WHERE email = ?";
         db.query(sql, [email], async (err, result) => {
             if (err) {
@@ -92,6 +118,7 @@ exports.loginUser = async (req, res) => {
 
             const user = result[0];
 
+            // compare entered password with hashed password in mysql
             const isMatch = await bcrypt.compare(password, user.password);
 
             if (!isMatch) {
@@ -100,6 +127,7 @@ exports.loginUser = async (req, res) => {
                 });
             }
 
+            // generate JWT token after successful login
             const token = jwt.sign(
                 {
                     id: user.id,
