@@ -50,7 +50,7 @@ function Login() {
     };
 
     return (
-        <div>
+        <div className="auth-container">
             <h2>Login Page</h2>
 
             <form onSubmit={handleSubmit}>

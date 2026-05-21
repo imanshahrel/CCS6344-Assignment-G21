@@ -39,3 +39,22 @@ nav ul {
 nav button {
     cursor: pointer;
 }
+
+.auth-container {
+  max-width: 400px;
+  margin: 80px auto;
+  padding: 25px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.auth-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-container input,
+.auth-container button {
+  padding: 10px;
+}

@@ -46,7 +46,7 @@ function Register() {
     };
 
     return (
-        <div>
+        <div className="auth-container">
             <h2>Patient Registration</h2>
 
             <form onSubmit={handleSubmit}>
