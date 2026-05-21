@@ -49,36 +49,39 @@ function BookAppointment() {
             <Navbar />
             <h1>Book Appointment</h1>
             {message && <p>{message}</p>}
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Appointment Date</label>
-                    <input
-                        type="date"
-                        value={date}
-                        onChange={(e) => setDate(e.target.value)}
-                    />
-                </div>
+            <div className="dashboard-card">
+                <form onSubmit={handleSubmit}>
+                    <div>
+                        <label>Appointment Date</label>
+                        <input
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                        />
+                    </div>
 
-                <div>
-                    <label>Appointment Time</label>
-                    <input
-                        type="time"
-                        value={time}
-                        onChange={(e) => setTime(e.target.value)}
-                    />
-                </div>
+                    <div>
+                        <label>Appointment Time</label>
+                        <input
+                            type="time"
+                            value={time}
+                            onChange={(e) => setTime(e.target.value)}
+                        />
+                    </div>
 
-                <div>
-                    <label>Reason for Visit</label>
-                    <textarea
-                        placeholder="Enter reason for appointment"
-                        value={reason}
-                        onChange={(e)=>setReason(e.target.value)}
-                    ></textarea>
-                </div>
+                    <div>
+                        <label>Reason for Visit</label>
+                        <textarea
+                            placeholder="Enter reason for appointment"
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
+                        ></textarea>
+                    </div>
 
-                <button type="submit">Book Appointment</button>
-            </form>
+                    <button type="submit">Book Appointment</button>
+                </form>
+            </div>
+            
         </div>
     );
 }
