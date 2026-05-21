@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Navbar from "../components/Navbar";
-import axios from "axios";
+import axios from "axios"; 
 
 function BookAppointment() {
     const [date, setDate] = useState("");
@@ -37,7 +37,7 @@ function BookAppointment() {
                         Authorization: 'Bearer ${token}',
                     },
                 }
-            );
+            ); // !!! Iman must create backend route for this
 
             setMessage(res.data.message || "Appointment booked successfully.");
         } catch (error) {
