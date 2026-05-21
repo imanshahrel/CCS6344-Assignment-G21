@@ -1,0 +1,22 @@
+nav {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+nav ul {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+    padding: 0;
+}
+
+nav a {
+    text-decoration: none;
+}
+
+.dashboard-card {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 8px;
+}
