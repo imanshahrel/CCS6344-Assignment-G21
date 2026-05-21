@@ -20,3 +20,22 @@ nav a {
     margin: 15px 0;
     border-radius: 8px;
 }
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f8f9fa;
+}
+
+nav h2 {
+    margin: 0;
+}
+
+nav ul {
+    align-items: center;
+}
+
+nav button {
+    cursor: pointer;
+}
