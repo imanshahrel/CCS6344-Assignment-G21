@@ -2,7 +2,21 @@ function DoctorDashboard() {
     return (
         <div>
             <h1>Doctor Dashboard</h1>
-            <p>Welcome doctor. You can view asssigned patients and appointments here.</p>
+
+            <div>
+                <h3>Assigned Patients</h3>
+                <p>View assigned patients.</p>
+            </div>
+
+            <div>
+                <h3>Today&apos;s Appointments</h3>
+                <p>Review scheduled consultations.</p>
+            </div>
+
+            <div>
+                <h3>Consultation Notes</h3>
+                <p>Update patient consultation records.</p>
+            </div>
         </div>
     );
 }
