@@ -23,7 +23,7 @@ function Appointments() {
         },
     ];
     return (
-        <div>
+        <div className="page-container">
             <Navbar />
             <h1>Appointments</h1>
             {sampleAppointments.map((appointment) => (

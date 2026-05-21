@@ -19,7 +19,7 @@ function Dashboard() {
     };
 
     return (
-        <div>
+        <div className="page-container">
             <Navbar />
             <h2>Clinic Management System</h2>
 

@@ -4,7 +4,7 @@ function Profile() {
     const user = JSON.parse(localStorage.getItem("user"));
 
     return (
-        <div>
+        <div className = "page-container">
             <Navbar />
             <h1>My Profile</h1>
 

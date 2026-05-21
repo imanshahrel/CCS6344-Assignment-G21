@@ -45,7 +45,7 @@ function BookAppointment() {
         }
     };
     return (
-        <div>
+        <div className="page-container">
             <Navbar />
             <h1>Book Appointment</h1>
             {message && <p>{message}</p>}
