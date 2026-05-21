@@ -23,6 +23,14 @@ function Register() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (!formData.name || !formData.email || !formData.password) {
+            setMessage("Please fill in all fields.");
+        }
+
+        if (!formData.password.length < 6) {
+            setMessage("Password must be at least 6 characters.")
+        }
+
         try {
             await axios.post("http://localhost:5000/api/users/register", {
                 ...formData,
