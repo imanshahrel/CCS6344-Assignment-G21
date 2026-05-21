@@ -1,15 +1,23 @@
 import Navbar from "../components/Navbar";
 
 function Profile() {
+    const user = JSON.parse(localStorage.getItem("user"));
+
     return (
         <div>
+            <Navbar />
             <h1>My Profile</h1>
 
-            <div classname="dashboard-card">
+            <div className="dashboard-card">
                 <h3>User Information</h3>
                 <p>Name: {user?.name}</p>
                 <p>Email: {user?.email}</p>
                 <p>Role: {user?.role}</p>
+            </div>
+            <div className="dashboard-card">
+                <h3>Account Security</h3>
+                <p>Password protected using JWT authentication</p>
+                <p>Authenticated session required to access profile</p>
             </div>
         </div>
     );
