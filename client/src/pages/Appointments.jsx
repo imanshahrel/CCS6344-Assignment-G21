@@ -4,6 +4,8 @@ import Navbar from "../components/Navbar";
 // replace const sampleAppointments = [...] with real API data from mysql (when backend appointment API exist later)
 
 function Appointments() {
+    // Temporary sample data.
+    // This will be replaced with real appointment data from the backend later.
     const sampleAppointments = [
         {
             id: 1,
