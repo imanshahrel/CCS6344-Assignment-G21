@@ -21,7 +21,20 @@ function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // validation
+        // to stop users from submitting empty or invalid login data before sending it to the backend
+        if (!formData.email || !formData.password) {
+            setMessage("Please enter both email and password.");
+            return;
+        }
 
+        if (!formData.email.includes("@")) {
+            setMessage("Please enter a valid email address.");
+            return;
+        }
+
+        // calling API/login request (only after validation passes)
         try {
             const res = await axios.post("http://localhost:5000/api/users/login", formData);
 
@@ -42,7 +55,9 @@ function Login() {
 
             <form onSubmit={handleSubmit}>
                 <input
-                    type="email"
+                    type="text"
+                    // type="text" enable us to use custom React message.
+                    // type="email" if want to use HTML validation, both is fine.
                     name="email"
                     placeholder="Enter email"
                     value={formData.email}
@@ -50,7 +65,7 @@ function Login() {
                 />
 
                 <br />
-
+                
                 <input
                     type="password"
                     name="password"
