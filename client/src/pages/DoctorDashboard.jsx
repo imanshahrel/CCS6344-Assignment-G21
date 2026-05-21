@@ -1,6 +1,6 @@
 function DoctorDashboard() {
     return (
-        <div>
+        <div className="card-grid">
             <h1>Doctor Dashboard</h1>
 
             <div className="dashboard-card">
