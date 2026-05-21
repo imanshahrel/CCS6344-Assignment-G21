@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Navbar from "../components/Navbar";
+import axios from "axios";
 
 function BookAppointment() {
     const [date, setDate] = useState("");
@@ -7,7 +8,7 @@ function BookAppointment() {
     const [reason, setReason] = useState("");
     const [message, setMessage] = useState("");
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!date || !time || !reason) {
@@ -19,12 +20,34 @@ function BookAppointment() {
             setMessage("Please elaborate.");
             return;
         }
-        setMessage("Appointment form sent!")
+        
+        try {
+            const token = localStorage.getItem("token");
+
+            // execution pauses here until the request finishes
+            const res = await axios.post(
+                "http://localhost:5000/api/appointments",
+                {
+                    date, time, reason
+                },
+                {
+                    header: {
+                        // sends appointment data to the backend API with the JWT token
+                        // this proves: frontend form -> backend API -> protected request
+                        Authorization: 'Bearer ${token}',
+                    },
+                }
+            );
+
+            setMessage(res.data.message || "Appointment booked successfully.");
+        } catch (error) {
+            setMessage(error.response?.data?.message || "Failed to book appoitnment");
+        }
     };
     return (
         <div>
             <Navbar />
-            <hi>Book Appointment</hi>
+            <h1>Book Appointment</h1>
             {message && <p>{message}</p>}
             <form onSubmit={handleSubmit}>
                 <div>
