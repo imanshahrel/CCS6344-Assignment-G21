@@ -15,9 +15,14 @@ function Navbar() {
                 <li>
                     <Link to="/dashboard">Dashboard</Link>
                 </li>
-                <li>
-                    <Link to="/book-appointment">Book Appointment</Link>
-                </li>
+
+                {/*RBAC: book appointment is set to only visible for patient*/} 
+                {user?.role === "patient" && (
+                    <li>
+                        <Link to="/book-appointment">Book Appointment</Link>
+                    </li>
+                )}
+
                 <li>
                     <Link to="/appointments">Appointments</Link>
                 </li>
