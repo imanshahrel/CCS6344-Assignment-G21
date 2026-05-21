@@ -111,3 +111,11 @@ textarea {
 textarea {
     min-height: 80px;
 }
+
+.message {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #e9f5ff;
+    border: 1px solid #b6e0fe;
+    border-radius: 5px;
+}

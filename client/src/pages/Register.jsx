@@ -83,7 +83,7 @@ function Register() {
                 <button type="submit">Register</button>
             </form>
 
-            <p>{message}</p>
+            {message && <p className="message">{message}</p>}
 
             <p>
                 Already have an account? <Link to="/">Login here</Link>

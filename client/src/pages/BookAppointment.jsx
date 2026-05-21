@@ -32,10 +32,10 @@ function BookAppointment() {
                     date, time, reason
                 },
                 {
-                    header: {
+                    headers: {
                         // sends appointment data to the backend API with the JWT token
                         // this proves: frontend form -> backend API -> protected request
-                        Authorization: 'Bearer ${token}',
+                        Authorization: `Bearer ${token}`,
                     },
                 }
             ); // !!! Iman must create backend route for this
@@ -49,7 +49,7 @@ function BookAppointment() {
         <div className="page-container">
             <Navbar />
             <h1>Book Appointment</h1>
-            {message && <p>{message}</p>}
+            {message && <p className="message">{message}</p>}
             <div className="dashboard-card">
                 <form onSubmit={handleSubmit}>
                     <div>

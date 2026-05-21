@@ -79,7 +79,7 @@ function Login() {
                 <button type="submit">Login</button>
             </form>
 
-            <p>{message}</p>
+            {message && <p className="message">{message}</p>}
             <p>
                 Don&apos;t have an account? <Link to="/register">Register here</Link>
             </p>
