@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import BookAppointment from "./pages/BookAppointment";
 import Appointments from "./pages/Appointments";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -31,6 +32,13 @@ function App() {
           path="/appointments"
           element={
             <ProtectedRoute><Appointments/></ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute><Profile /></ProtectedRoute>
           }
         />
       </Routes>

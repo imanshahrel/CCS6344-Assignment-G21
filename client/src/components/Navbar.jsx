@@ -22,11 +22,15 @@ function Navbar() {
                     <Link to="/appointments">Appointments</Link>
                 </li>
                 <li>
+                    <Link to="/profile">Profile</Link>
+                </li>
+                <li>
                     Logged in as: <strong>{user?.role}</strong>
                 </li>
                 <li>
                     <button onClick={handleLogout}>Logout</button>
                 </li>
+
             </ul>
         </nav>
         
