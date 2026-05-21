@@ -1,4 +1,5 @@
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 // Note to Iman (backend): this is just a sample appointment records before the backend integration
 // replace const sampleAppointments = [...] with real API data from mysql (when backend appointment API exist later)
@@ -34,8 +35,12 @@ function Appointments() {
                     <p>Status: {appointment.status}</p>
                 </div>
             ))}
+            <Footer />
         </div>
     );
+
+    
 }
 
 export default Appointments;
+

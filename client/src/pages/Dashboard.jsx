@@ -5,6 +5,7 @@ import AdminDashboard from "./AdminDashboard";
 import DoctorDashboard from "./DoctorDashboard";
 import PatientDashboard from "./PatientDashboard";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 function Dashboard() {
     const navigate = useNavigate();
@@ -40,6 +41,7 @@ function Dashboard() {
                     <p>Please login again.</p>
                 </div>
             )}
+            <Footer />
         </div>
     );
 }

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Navbar from "../components/Navbar";
 import axios from "axios"; 
+import Footer from "../components/Footer";
 
 function BookAppointment() {
     const [date, setDate] = useState("");
@@ -81,6 +82,7 @@ function BookAppointment() {
                     <button type="submit">Book Appointment</button>
                 </form>
             </div>
+            <Footer />
             
         </div>
     );
