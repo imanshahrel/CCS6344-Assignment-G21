@@ -1,62 +1,73 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
+
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
-// BE later: enforce appointment access properly using SQL query + JWT user ID.
-
 function Appointments() {
-    const user = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("token");
+    const currentUser = JSON.parse(localStorage.getItem("user"));
 
-    // Temporary sample data.
-    // FE later: replace this with real API data from backend.
-    const allAppointments = [
-        {
-            id: 1,
-            patientName: "Nelly",
-            patientEmail: "nelly@gmail.com",
-            date: "2026-05-23",
-            time: "10:00 AM",
-            reason: "General check-up",
-            status: "Pending",
-        },
-        {
-            id: 2,
-            patientName: "Iman",
-            patientEmail: "iman@gmail.com",
-            date: "2026-05-25",
-            time: "2:30 PM",
-            reason: "Follow-up consultation",
-            status: "Approved",
-        },
-    ];
+    const [appointments, setAppointments] = useState([]);
+    const [message, setMessage] = useState("");
 
-    const appointments =
-        user?.role === "patient"
-            ? allAppointments.filter(
-                (appointment) => appointment.patientEmail === user.email
-            )
-            : allAppointments;
+    const fetchAppointments = async () => {
+        try {
+            const res = await axios.get(
+                "http://localhost:5000/api/appointments/doctor/upcoming",
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            setAppointments(res.data);
+        } catch (error) {
+            setMessage(
+                error.response?.data?.message || "Failed to fetch appointments"
+            );
+        }
+    };
+
+    useEffect(() => {
+        if (currentUser?.role === "doctor") {
+            fetchAppointments();
+        }
+    }, []);
+
+    if (currentUser?.role !== "doctor") {
+        return (
+            <div className="page-container">
+                <Navbar />
+                <p className="message">Access denied. Doctor only.</p>
+                <Footer />
+            </div>
+        );
+    }
 
     return (
         <div className="page-container">
             <Navbar />
 
-            <h1>Appointments</h1>
+            <h1>Upcoming Appointments</h1>
+
+            {message && <p className="message">{message}</p>}
 
             <div className="card-grid">
-                {appointments.length > 0 ? (
+                {appointments.length === 0 ? (
+                    <p>No upcoming appointments found.</p>
+                ) : (
                     appointments.map((appointment) => (
                         <div className="dashboard-card" key={appointment.id}>
-                            <h3>{appointment.reason}</h3>
-                            <p>Patient: {appointment.patientName}</p>
+                            <h3>{appointment.patientName}</h3>
+                            <p>Email: {appointment.patientEmail}</p>
                             <p>Date: {appointment.date}</p>
                             <p>Time: {appointment.time}</p>
+                            <p>Reason: {appointment.reason}</p>
                             <p>Status: {appointment.status}</p>
                         </div>
                     ))
-                ) : (
-                    <p className="message">
-                        No appointments found for this account.
-                    </p>
                 )}
             </div>
 
