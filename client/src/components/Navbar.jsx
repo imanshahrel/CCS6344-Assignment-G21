@@ -29,24 +29,24 @@ function Navbar() {
                 <li>
                     <Link to="/profile">Profile</Link>
                 </li>
-                <li>
-                    Logged in as: <strong>{user?.role}</strong>
-                </li>
-                <li>
-                    <button onClick={handleLogout}>Logout</button>
-                </li>
-
+                
                 {user?.role === "admin" && (
                     <li>
                         <Link to="/manage-users">Manage Users</Link>
                     </li>
                 )}
 
-                {user?.role === "admin" && (
+
+                {(user?.role === "doctor" || user?.role === "patient") && (
                     <li>
-                        <Link to="/assign-doctor">Assign Doctor</Link>
+                        <Link to="/medical-records">Medical Records</Link>
                     </li>
                 )}
+
+                <li>
+                    <button onClick={handleLogout}>Logout</button>
+                </li>
+
                 
 
             </ul>

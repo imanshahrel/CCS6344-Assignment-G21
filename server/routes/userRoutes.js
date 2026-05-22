@@ -22,3 +22,6 @@ router.get("/admin", verifyToken, verifyAdmin, (req, res) => {
     });
 });
 module.exports = router;
+router.get("/", verifyToken, verifyAdmin, userController.getAllUsers);
+router.post("/doctor", verifyToken, verifyAdmin, userController.createDoctor);
+router.put("/assign-doctor", verifyToken, verifyAdmin, userController.assignDoctor);

@@ -156,3 +156,126 @@ exports.loginUser = async (req, res) => {
         });
     }
 };
+
+// GET ALL USERS - ADMIN ONLY
+exports.getAllUsers = (req, res) => {
+    const sql = `
+        SELECT 
+            u.id,
+            u.name,
+            u.email,
+            u.role,
+            u.specialization,
+            u.assigned_doctor_id,
+            d.name AS assignedDoctorName
+        FROM users u
+        LEFT JOIN users d ON u.assigned_doctor_id = d.id
+        ORDER BY u.id DESC
+    `;
+
+    db.query(sql, (err, result) => {
+        if (err) {
+            return res.status(500).json({
+                message: "Failed to fetch users",
+                error: err
+            });
+        }
+
+        res.status(200).json(result);
+    });
+};
+
+// CREATE DOCTOR ACCOUNT - ADMIN ONLY
+exports.createDoctor = async (req, res) => {
+    const { name, email, password, specialization } = req.body;
+
+    if (!name || !email || !password || !specialization) {
+        return res.status(400).json({
+            message: "Please fill in all doctor fields"
+        });
+    }
+
+    try {
+        const checkSql = "SELECT * FROM users WHERE email = ?";
+
+        db.query(checkSql, [email], async (err, result) => {
+            if (err) {
+                return res.status(500).json({
+                    message: "Database error",
+                    error: err
+                });
+            }
+
+            if (result.length > 0) {
+                return res.status(400).json({
+                    message: "Email already exists"
+                });
+            }
+
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            const insertSql = `
+                INSERT INTO users (name, email, password, role, specialization)
+                VALUES (?, ?, ?, 'doctor', ?)
+            `;
+
+            db.query(
+                insertSql,
+                [name, email, hashedPassword, specialization],
+                (err) => {
+                    if (err) {
+                        return res.status(500).json({
+                            message: "Failed to create doctor",
+                            error: err
+                        });
+                    }
+
+                    res.status(201).json({
+                        message: "Doctor account created successfully"
+                    });
+                }
+            );
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "Server error",
+            error
+        });
+    }
+};
+
+// ASSIGN DOCTOR TO PATIENT - ADMIN ONLY
+exports.assignDoctor = (req, res) => {
+    const { patientId, doctorId } = req.body;
+
+    if (!patientId || !doctorId) {
+        return res.status(400).json({
+            message: "Please select both patient and doctor"
+        });
+    }
+
+    const sql = `
+        UPDATE users
+        SET assigned_doctor_id = ?
+        WHERE id = ? AND role = 'patient'
+    `;
+
+    db.query(sql, [doctorId, patientId], (err, result) => {
+        if (err) {
+            return res.status(500).json({
+                message: "Failed to assign doctor",
+                error: err
+            });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                message: "Patient not found"
+            });
+        }
+
+        res.status(200).json({
+            message: "Doctor assigned successfully"
+        });
+    });
+};

@@ -119,3 +119,15 @@ textarea {
     border: 1px solid #b6e0fe;
     border-radius: 5px;
 }
+
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-form select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}

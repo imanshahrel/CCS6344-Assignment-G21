@@ -8,7 +8,8 @@ import BookAppointment from "./pages/BookAppointment";
 import Appointments from "./pages/Appointments";
 import Profile from "./pages/Profile";
 import ManageUsers from "./pages/ManageUsers";
-import AssignDoctor from "./pages/AssignDoctor";
+import MedicalRecords from "./pages/MedicalRecords";
+
 
 function App() {
   return (
@@ -52,9 +53,11 @@ function App() {
         />
 
         <Route
-          path="/assign-doctor"
+          path="/medical-records"
           element={
-            <ProtectedRoute><AssignDoctor/></ProtectedRoute>
+            <ProtectedRoute>
+              <MedicalRecords />
+            </ProtectedRoute>
           }
         />
       </Routes>
