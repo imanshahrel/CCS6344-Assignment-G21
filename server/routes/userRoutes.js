@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+
 const userController = require("../controllers/userController");
 const { verifyToken, verifyAdmin } = require("../middleware/authMiddleware");
 
@@ -25,3 +26,5 @@ module.exports = router;
 router.get("/", verifyToken, verifyAdmin, userController.getAllUsers);
 router.post("/doctor", verifyToken, verifyAdmin, userController.createDoctor);
 router.put("/assign-doctor", verifyToken, verifyAdmin, userController.assignDoctor);
+
+module.exports = router;

@@ -11,11 +11,15 @@ const db = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 // imports a routhe module from a local file located at ./routes/userRoutes.js
 const userRoutes = require("./routes/userRoutes");
+const appointmentRoutes = require("./routes/appointmentRoutes");
+const medicalRecordRoutes = require("./routes/medicalRecordRoutes");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use("/api/appointments", appointmentRoutes);
+app.use("/api/medical-records", medicalRecordRoutes);
 
 
 // connecting route to the server
