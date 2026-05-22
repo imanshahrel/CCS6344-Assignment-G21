@@ -6,7 +6,7 @@ exports.getDoctorMedicalRecords = (req, res) => {
 
     const sql = `
         SELECT 
-            mr.id,
+            mr.mr_id AS id,
             p.name AS patientName,
             p.email AS patientEmail,
             d.name AS doctorName,
@@ -25,6 +25,7 @@ exports.getDoctorMedicalRecords = (req, res) => {
 
     db.query(sql, [doctorId, `%${patientName}%`], (err, result) => {
         if (err) {
+            console.log("Medical records SQL error:", err);
             return res.status(500).json({
                 message: "Failed to fetch medical records",
                 error: err
