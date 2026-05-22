@@ -7,6 +7,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import BookAppointment from "./pages/BookAppointment";
 import Appointments from "./pages/Appointments";
 import Profile from "./pages/Profile";
+import ManageUsers from "./pages/ManageUsers";
+import AssignDoctor from "./pages/AssignDoctor";
 
 function App() {
   return (
@@ -39,6 +41,20 @@ function App() {
           path="/profile"
           element={
             <ProtectedRoute><Profile /></ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/manage-users"
+          element={
+            <ProtectedRoute><ManageUsers /></ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/assign-doctor"
+          element={
+            <ProtectedRoute><AssignDoctor/></ProtectedRoute>
           }
         />
       </Routes>

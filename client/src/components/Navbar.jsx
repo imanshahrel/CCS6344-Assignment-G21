@@ -36,6 +36,19 @@ function Navbar() {
                     <button onClick={handleLogout}>Logout</button>
                 </li>
 
+                {user?.role === "admin" && (
+                    <li>
+                        <Link to="/manage-users">Manage Users</Link>
+                    </li>
+                )}
+
+                {user?.role === "admin" && (
+                    <li>
+                        <Link to="/assign-doctor">Assign Doctor</Link>
+                    </li>
+                )}
+                
+
             </ul>
         </nav>
         
