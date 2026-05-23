@@ -1,281 +1,164 @@
 const db = require("../config/db");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+const { logAction } = require("../utils/auditLogger");
 
-// REGISTER USER
-exports.registerUser = async (req, res) => {
-    const { name, email, password, role } = req.body;
-
-    // validation
-    if (!name || !email || !password) {
-        return res.status(400).json({
-            message: "Please fill in all required fields"
-        });
-    }
-
-    // check email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailRegex.test(email)) {
-        return res.status(400).json({
-            message: "Invalid email format"
-        });
-    }
-
-    // check password length
-    if (password.length < 6) {
-        return res.status(400).json({
-            message: "Password must be at least 6 characters"
-        });
-    }
-
+// ── GET ALL USERS (admin only) ────────────────────────────────────────────────
+exports.getAllUsers = async (req, res) => {
     try {
-        // check existing email
-        const checkSql = "SELECT * FROM users WHERE email = ?";
-
-        db.query(checkSql, [email], async (err, result) => {
-            if (err) {
-                return res.status(500).json({
-                    message: "Database error",
-                    error: err
-                });
-            }
-
-            if (result.length > 0) {
-                return res.status(400).json({
-                    message: "Email already exists"
-                });
-            }
-
-            // hash password before storing in db
-            const hashedPassword = await bcrypt.hash(password, 10);
-
-            // insert user into mysql
-            const insertSql =
-                "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)";
-
-            db.query(
-                insertSql,
-                [name, email, hashedPassword, role || "patient"],
-                (err, result) => {
-                    if (err) {
-                        return res.status(500).json({
-                            message: "Insert failed",
-                            error: err
-                        });
-                    }
-
-                    res.status(201).json({
-                        message: "User registered successfully"
-                    });
-                }
-            );
-        });
+        const [rows] = await db.query(`
+            SELECT 
+                u.user_id, u.user_name, u.user_email, u.user_role, 
+                u.user_phone, u.user_create_at, u.doctor_id,
+                d.doctor_name AS assigned_doctor_name,
+                d.doctor_specialization AS assigned_doctor_specialization
+            FROM users u
+            LEFT JOIN doctors d ON u.doctor_id = d.doctor_id
+        `);
+        res.status(200).json(rows);
     } catch (error) {
-        res.status(500).json({
-            message: "Server error",
-            error: error
-        });
+        res.status(500).json({ message: "Server error.", error: error.message });
     }
 };
 
-// LOGIN USER
-exports.loginUser = async (req, res) => {
-    const { email, password } = req.body;
+// ── GET USER BY ID ────────────────────────────────────────────────────────────
+exports.getUserById = async (req, res) => {
+    const targetId = parseInt(req.params.id);
 
-    // validation
-    if (!email || !password) {
-        return res.status(400).json({
-            message: "Email and password are required"
-        });
-    }
-
-    // check email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailRegex.test(email)) {
-        return res.status(400).json({
-            message: "Invalid email format"
-        });
+    if (req.user.role !== "admin" && req.user.id !== targetId) {
+        return res.status(403).json({ message: "Access denied." });
     }
 
     try {
-        // find user by email
-        const sql = "SELECT * FROM users WHERE email = ?";
-        db.query(sql, [email], async (err, result) => {
-            if (err) {
-                return res.status(500).json({
-                    message: "Database error",
-                    error: err
-                });
-            }
+        const [rows] = await db.query(`
+            SELECT 
+                u.user_id, u.user_name, u.user_email, u.user_role,
+                u.user_phone, u.user_create_at, u.doctor_id,
+                d.doctor_name AS assigned_doctor_name
+            FROM users u
+            LEFT JOIN doctors d ON u.doctor_id = d.doctor_id
+            WHERE u.user_id = ?
+        `, [targetId]);
 
-            if (result.length === 0) {
-                return res.status(401).json({
-                    message: "Invalid email or password"
-                });
-            }
-
-            const user = result[0];
-
-            // compare entered password with hashed password in mysql
-            const isMatch = await bcrypt.compare(password, user.password);
-
-            if (!isMatch) {
-                return res.status(401).json({
-                    message: "Invalid email or password"
-                });
-            }
-
-            // generate JWT token after successful login
-            const token = jwt.sign(
-                {
-                    id: user.id,
-                    email: user.email,
-                    role: user.role
-                },
-                process.env.JWT_SECRET,
-                { expiresIn: "1h" }
-            );
-
-            res.status(200).json({
-                message: "Login successful",
-                token: token,
-                user: {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
-                    role: user.role
-                }
-            });
-        });
-    } catch (error) {
-        res.status(500).json({
-            message: "Server error",
-            error: error
-        });
-    }
-};
-
-// GET ALL USERS - ADMIN ONLY
-exports.getAllUsers = (req, res) => {
-    const sql = `
-        SELECT 
-            u.id,
-            u.name,
-            u.email,
-            u.role,
-            u.specialization,
-            u.assigned_doctor_id,
-            d.name AS assignedDoctorName
-        FROM users u
-        LEFT JOIN users d ON u.assigned_doctor_id = d.id
-        ORDER BY u.id DESC
-    `;
-
-    db.query(sql, (err, result) => {
-        if (err) {
-            return res.status(500).json({
-                message: "Failed to fetch users",
-                error: err
-            });
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "User not found." });
         }
-
-        res.status(200).json(result);
-    });
+        res.status(200).json(rows[0]);
+    } catch (error) {
+        res.status(500).json({ message: "Server error.", error: error.message });
+    }
 };
 
-// CREATE DOCTOR ACCOUNT - ADMIN ONLY
-exports.createDoctor = async (req, res) => {
-    const { name, email, password, specialization } = req.body;
+// ── UPDATE USER ───────────────────────────────────────────────────────────────
+exports.updateUser = async (req, res) => {
+    const targetId = parseInt(req.params.id);
+    const { user_name, user_email, user_phone, user_role } = req.body;
 
-    if (!name || !email || !password || !specialization) {
-        return res.status(400).json({
-            message: "Please fill in all doctor fields"
-        });
+    if (req.user.role !== "admin" && req.user.id !== targetId) {
+        return res.status(403).json({ message: "Access denied." });
     }
+
+    const roleToSet = req.user.role === "admin" ? user_role : undefined;
 
     try {
-        const checkSql = "SELECT * FROM users WHERE email = ?";
-
-        db.query(checkSql, [email], async (err, result) => {
-            if (err) {
-                return res.status(500).json({
-                    message: "Database error",
-                    error: err
-                });
-            }
-
-            if (result.length > 0) {
-                return res.status(400).json({
-                    message: "Email already exists"
-                });
-            }
-
-            const hashedPassword = await bcrypt.hash(password, 10);
-
-            const insertSql = `
-                INSERT INTO users (name, email, password, role, specialization)
-                VALUES (?, ?, ?, 'doctor', ?)
-            `;
-
-            db.query(
-                insertSql,
-                [name, email, hashedPassword, specialization],
-                (err) => {
-                    if (err) {
-                        return res.status(500).json({
-                            message: "Failed to create doctor",
-                            error: err
-                        });
-                    }
-
-                    res.status(201).json({
-                        message: "Doctor account created successfully"
-                    });
-                }
-            );
-        });
-    } catch (error) {
-        res.status(500).json({
-            message: "Server error",
-            error
-        });
-    }
-};
-
-// ASSIGN DOCTOR TO PATIENT - ADMIN ONLY
-exports.assignDoctor = (req, res) => {
-    const { patientId, doctorId } = req.body;
-
-    if (!patientId || !doctorId) {
-        return res.status(400).json({
-            message: "Please select both patient and doctor"
-        });
-    }
-
-    const sql = `
-        UPDATE users
-        SET assigned_doctor_id = ?
-        WHERE id = ? AND role = 'patient'
-    `;
-
-    db.query(sql, [doctorId, patientId], (err, result) => {
-        if (err) {
-            return res.status(500).json({
-                message: "Failed to assign doctor",
-                error: err
-            });
-        }
+        const [result] = await db.query(
+            `UPDATE users 
+             SET user_name = ?, user_email = ?, user_phone = ?
+             ${roleToSet !== undefined ? ", user_role = ?" : ""}
+             WHERE user_id = ?`,
+            roleToSet !== undefined
+                ? [user_name, user_email, user_phone, roleToSet, targetId]
+                : [user_name, user_email, user_phone, targetId]
+        );
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({
-                message: "Patient not found"
-            });
+            return res.status(404).json({ message: "User not found." });
         }
 
+        const ip = req.ip || req.socket.remoteAddress;
+        await logAction(req.user.id, `UPDATE_USER_${targetId}`, ip);
+
+        res.status(200).json({ message: "User updated successfully." });
+    } catch (error) {
+        res.status(500).json({ message: "Server error.", error: error.message });
+    }
+};
+
+// ── ASSIGN DOCTOR TO PATIENT (admin only) ─────────────────────────────────────
+exports.assignDoctor = async (req, res) => {
+    const { patientId, doctorId } = req.body;
+
+    if (!patientId) {
+        return res.status(400).json({ message: "patientId is required." });
+    }
+
+    try {
+        // Verify patient exists and is actually a patient
+        const [patients] = await db.query(
+            "SELECT user_id, user_role FROM users WHERE user_id = ?",
+            [patientId]
+        );
+
+        if (patients.length === 0) {
+            return res.status(404).json({ message: "Patient not found." });
+        }
+
+        if (patients[0].user_role !== "patient") {
+            return res.status(400).json({ message: "Target user is not a patient." });
+        }
+
+        // If doctorId is null/empty, unassign the doctor
+        const resolvedDoctorId = doctorId || null;
+
+        if (resolvedDoctorId) {
+            // Verify doctor exists
+            const [doctors] = await db.query(
+                "SELECT doctor_id FROM doctors WHERE doctor_id = ?",
+                [resolvedDoctorId]
+            );
+            if (doctors.length === 0) {
+                return res.status(404).json({ message: "Doctor not found." });
+            }
+        }
+
+        await db.query(
+            "UPDATE users SET doctor_id = ? WHERE user_id = ?",
+            [resolvedDoctorId, patientId]
+        );
+
+        const ip = req.ip || req.socket.remoteAddress;
+        const action = resolvedDoctorId
+            ? `ASSIGN_DOCTOR_${resolvedDoctorId}_TO_PATIENT_${patientId}`
+            : `UNASSIGN_DOCTOR_FROM_PATIENT_${patientId}`;
+        await logAction(req.user.id, action, ip);
+
         res.status(200).json({
-            message: "Doctor assigned successfully"
+            message: resolvedDoctorId
+                ? "Doctor assigned successfully."
+                : "Doctor unassigned successfully."
         });
-    });
+    } catch (error) {
+        res.status(500).json({ message: "Server error.", error: error.message });
+    }
+};
+
+// ── DELETE USER (admin only) ──────────────────────────────────────────────────
+exports.deleteUser = async (req, res) => {
+    const targetId = parseInt(req.params.id);
+
+    try {
+        const [result] = await db.query(
+            "DELETE FROM users WHERE user_id = ?",
+            [targetId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        const ip = req.ip || req.socket.remoteAddress;
+        await logAction(req.user.id, `DELETE_USER_${targetId}`, ip);
+
+        res.status(200).json({ message: "User deleted successfully." });
+    } catch (error) {
+        res.status(500).json({ message: "Server error.", error: error.message });
+    }
 };
