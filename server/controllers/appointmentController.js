@@ -1,32 +1,172 @@
 const db = require("../config/db");
+const { logAction } = require("../utils/auditLogger");
 
-exports.getDoctorUpcomingAppointments = (req, res) => {
-    const doctorId = req.user.id;
+// ── GET ALL APPOINTMENTS ──────────────────────────────────────────────────────
+exports.getAllAppointments = async (req, res) => {
+    try {
+        let rows;
 
-    const sql = `
-        SELECT 
-            a.id,
-            p.name AS patientName,
-            p.email AS patientEmail,
-            a.appointment_date AS date,
-            a.appointment_time AS time,
-            a.reason,
-            a.status
-        FROM appointments a
-        JOIN users p ON a.patient_id = p.id
-        WHERE a.doctor_id = ?
-        AND a.appointment_date >= CURDATE()
-        ORDER BY a.appointment_date, a.appointment_time
-    `;
-
-    db.query(sql, [doctorId], (err, result) => {
-        if (err) {
-            return res.status(500).json({
-                message: "Failed to fetch doctor appointments",
-                error: err
-            });
+        if (req.user.role === "admin") {
+            [rows] = await db.query(`
+                SELECT 
+                    a.*,
+                    u.user_name   AS patient_name,
+                    d.doctor_name,
+                    d.doctor_specialization
+                FROM appointments a
+                JOIN users   u ON a.patient_id = u.user_id
+                JOIN doctors d ON a.doctor_id  = d.doctor_id
+                ORDER BY a.appointment_date DESC, a.appointment_time DESC
+            `);
+        } else {
+            [rows] = await db.query(`
+                SELECT 
+                    a.*,
+                    u.user_name   AS patient_name,
+                    d.doctor_name,
+                    d.doctor_specialization
+                FROM appointments a
+                JOIN users   u ON a.patient_id = u.user_id
+                JOIN doctors d ON a.doctor_id  = d.doctor_id
+                WHERE a.patient_id = ?
+                ORDER BY a.appointment_date DESC, a.appointment_time DESC
+            `, [req.user.id]);
         }
 
-        res.status(200).json(result);
-    });
+        res.status(200).json(rows);
+    } catch (error) {
+        res.status(500).json({ message: "Server error.", error: error.message });
+    }
+};
+
+// ── GET APPOINTMENT BY ID ─────────────────────────────────────────────────────
+exports.getAppointmentById = async (req, res) => {
+    try {
+        const [rows] = await db.query(`
+            SELECT 
+                a.*,
+                u.user_name   AS patient_name,
+                d.doctor_name,
+                d.doctor_specialization
+            FROM appointments a
+            JOIN users   u ON a.patient_id = u.user_id
+            JOIN doctors d ON a.doctor_id  = d.doctor_id
+            WHERE a.appointment_id = ?
+        `, [req.params.id]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "Appointment not found." });
+        }
+
+        const appt = rows[0];
+        if (req.user.role !== "admin" && appt.patient_id !== req.user.id) {
+            return res.status(403).json({ message: "Access denied." });
+        }
+
+        res.status(200).json(appt);
+    } catch (error) {
+        res.status(500).json({ message: "Server error.", error: error.message });
+    }
+};
+
+// ── CREATE APPOINTMENT ────────────────────────────────────────────────────────
+// Accepts: doctor_id, appointment_date, appointment_time, appointment_reason
+// Patient books for themselves; admin can specify a patient_id
+exports.createAppointment = async (req, res) => {
+    const {
+        doctor_id,
+        appointment_date,
+        appointment_time,
+        appointment_reason,
+        patient_id
+    } = req.body;
+
+    if (!doctor_id || !appointment_date || !appointment_time) {
+        return res.status(400).json({
+            message: "doctor_id, appointment_date, and appointment_time are required."
+        });
+    }
+
+    const resolvedPatientId = req.user.role === "admin" && patient_id
+        ? patient_id
+        : req.user.id;
+
+    try {
+        const [result] = await db.query(
+            `INSERT INTO appointments 
+             (patient_id, doctor_id, appointment_date, appointment_time, appointment_status, appointment_reason) 
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [resolvedPatientId, doctor_id, appointment_date, appointment_time, "pending", appointment_reason || null]
+        );
+
+        const ip = req.ip || req.socket.remoteAddress;
+        await logAction(req.user.id, `CREATE_APPOINTMENT_${result.insertId}`, ip);
+
+        res.status(201).json({
+            message: "Appointment booked successfully.",
+            appointment_id: result.insertId
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Server error.", error: error.message });
+    }
+};
+
+// ── UPDATE APPOINTMENT (admin only) ──────────────────────────────────────────
+exports.updateAppointment = async (req, res) => {
+    const { appointment_status, appointment_date, appointment_time, doctor_id, appointment_reason } = req.body;
+
+    try {
+        const [result] = await db.query(
+            `UPDATE appointments 
+             SET appointment_status = ?, appointment_date = ?, appointment_time = ?, 
+                 doctor_id = ?, appointment_reason = ?
+             WHERE appointment_id = ?`,
+            [appointment_status, appointment_date, appointment_time, doctor_id, appointment_reason, req.params.id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Appointment not found." });
+        }
+
+        const ip = req.ip || req.socket.remoteAddress;
+        await logAction(req.user.id, `UPDATE_APPOINTMENT_${req.params.id}`, ip);
+
+        res.status(200).json({ message: "Appointment updated successfully." });
+    } catch (error) {
+        res.status(500).json({ message: "Server error.", error: error.message });
+    }
+};
+
+// ── DELETE APPOINTMENT ────────────────────────────────────────────────────────
+exports.deleteAppointment = async (req, res) => {
+    try {
+        if (req.user.role !== "admin") {
+            const [rows] = await db.query(
+                "SELECT patient_id FROM appointments WHERE appointment_id = ?",
+                [req.params.id]
+            );
+            if (rows.length === 0) {
+                return res.status(404).json({ message: "Appointment not found." });
+            }
+            if (rows[0].patient_id !== req.user.id) {
+                return res.status(403).json({ message: "Access denied." });
+            }
+        }
+
+        const [result] = await db.query(
+            "DELETE FROM appointments WHERE appointment_id = ?",
+            [req.params.id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Appointment not found." });
+        }
+
+        const ip = req.ip || req.socket.remoteAddress;
+        await logAction(req.user.id, `DELETE_APPOINTMENT_${req.params.id}`, ip);
+
+        res.status(200).json({ message: "Appointment deleted successfully." });
+    } catch (error) {
+        res.status(500).json({ message: "Server error.", error: error.message });
+    }
 };
