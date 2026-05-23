@@ -8,7 +8,8 @@ function Register() {
     const [formData, setFormData] = useState({
         name: "",
         email: "",
-        password: ""
+        password: "",
+        phone: ""   
     });
 
     const [message, setMessage] = useState("");
@@ -32,7 +33,7 @@ function Register() {
         }
 
         try {
-            await axios.post("http://localhost:5000/api/users/register", {
+            await axios.post("http://localhost:5001/api/users/register", {
                 ...formData,
                 role: "patient" // role is set to patient only upon registration
                                 // doctor role is to be assign by assigned by the admin
@@ -78,6 +79,16 @@ function Register() {
                     onChange={handleChange}
                 />
 
+                <br />
+
+                <input
+                    type="text"
+                    name="phone"
+                    placeholder="Enter phone number"
+                    value={formData.phone}
+                    onChange={handleChange}
+                />
+                
                 <br />
 
                 <button type="submit">Register</button>
