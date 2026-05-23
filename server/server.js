@@ -1,37 +1,40 @@
 require("dotenv").config();
 
 const express = require("express");
-
-// backend permission for browser (security purpose)
 const cors = require("cors");
 
+// DB connection (imported here to trigger the startup connection test)
 const db = require("./config/db");
 
-// connecting route to the server
-const authRoutes = require("./routes/authRoutes");
-// imports a routhe module from a local file located at ./routes/userRoutes.js
-const userRoutes = require("./routes/userRoutes");
-const appointmentRoutes = require("./routes/appointmentRoutes");
+// ── Routes ────────────────────────────────────────────────────────────────────
+const authRoutes         = require("./routes/authRoutes");
+const userRoutes         = require("./routes/userRoutes");
+const doctorRoutes       = require("./routes/doctorRoutes");
+const appointmentRoutes  = require("./routes/appointmentRoutes");
 const medicalRecordRoutes = require("./routes/medicalRecordRoutes");
+const auditLogRoutes     = require("./routes/auditLogRoutes");
 
 const app = express();
 
+// ── Middleware ────────────────────────────────────────────────────────────────
 app.use(cors());
 app.use(express.json());
-app.use("/api/appointments", appointmentRoutes);
+
+// ── API Endpoints ─────────────────────────────────────────────────────────────
+app.use("/api/auth",            authRoutes);
+app.use("/api/users",           userRoutes);
+app.use("/api/doctors",         doctorRoutes);
+app.use("/api/appointments",    appointmentRoutes);
 app.use("/api/medical-records", medicalRecordRoutes);
+app.use("/api/audit-logs",      auditLogRoutes);
 
-
-// connecting route to the server
-app.use("/api/auth", authRoutes);
-
-// mounts that router at the api/users path
-app.use("/api/users", userRoutes);
-
+// Health check
 app.get("/", (req, res) => {
     res.send("Clinic API running");
 });
 
-app.listen(5000, () => {
-    console.log("Server running on port 5000");
+// ── Start Server ──────────────────────────────────────────────────────────────
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
