@@ -36,7 +36,7 @@ function Login() {
 
         // calling API/login request (only after validation passes)
         try {
-            const res = await axios.post("http://localhost:5000/api/users/login", formData);
+            const res = await axios.post("http://localhost:5001/api/users/login", formData);
 
             // save both the token and user role correctly
             localStorage.setItem("token", res.data.token);
