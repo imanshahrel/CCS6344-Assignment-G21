@@ -1,58 +1,31 @@
 const jwt = require("jsonwebtoken");
 
-// verify if user has valid JWT token
-exports.verifyToken = (req, res, next) => {
+// ── Verify JWT token ──────────────────────────────────────────────────────────
+// Attach decoded payload to req.user so downstream routes can read it
+const verifyToken = (req, res, next) => {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1]; // Expect: "Bearer <token>"
 
-    // get token from request header
-    const authHeader = req.headers.authorization;
-
-    // reject if token is missing
-    if (!authHeader) {
-        return res.status(401).json({ message: "No token provided" });
+    if (!token) {
+        return res.status(401).json({ message: "Access denied. No token provided." });
     }
 
-    // extract token from "Bearer TOKEN"
-    const token = authHeader.split(" ")[1];
-
-    // verify token using secret key
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        // store decoded user information
-        req.user = decoded;
-
-        // continue to next middleware/route
+        req.user = decoded; // { id, email, role }
         next();
-
     } catch (error) {
-
-        // reject invalid or expired token
-        return res.status(403).json({ message: "Invalid or expired token" });
+        return res.status(403).json({ message: "Invalid or expired token." });
     }
 };
 
-// verify is user is admin
-exports.verifyAdmin = (req, res, next) => {
-
-    // check user role
+// ── Verify Admin role ─────────────────────────────────────────────────────────
+// Must be used AFTER verifyToken in the middleware chain
+const verifyAdmin = (req, res, next) => {
     if (req.user.role !== "admin") {
-
-        // deny if not admin
-        return res.status(403).json({
-            message: "Access denied. Admin only."
-        });
+        return res.status(403).json({ message: "Access denied. Admins only." });
     }
-
-    // continue if user is admin
     next();
 };
 
-exports.verifyDoctor = (req, res, next) => {
-    if (req.user.role !== "doctor") {
-        return res.status(403).json({
-            message: "Access denied. Doctor only."
-        });
-    }
-
-    next();
-};
+module.exports = { verifyToken, verifyAdmin };
