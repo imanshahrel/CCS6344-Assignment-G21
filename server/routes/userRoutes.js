@@ -1,30 +1,22 @@
 const express = require("express");
 const router = express.Router();
-
+const { registerUser, loginUser } = require("../controllers/authController");
 const userController = require("../controllers/userController");
 const { verifyToken, verifyAdmin } = require("../middleware/authMiddleware");
 
-router.post("/register", userController.registerUser);
-router.post("/login", userController.loginUser);
+// ── Auth routes ───────────────────────────────────────────────────────────────
+router.post("/register", registerUser);
+router.post("/login", loginUser);
 
-// test protected route
-router.get("/profile", verifyToken, (req, res) => {
-    res.json({
-        message: "Access granted",
-        user: req.user
-    });
-});
-
-// admin only route
-router.get("/admin", verifyToken, verifyAdmin, (req, res) => {
-    res.json({
-        message: "Welcome admin. Access granted.",
-        user: req.user
-    });
-});
-module.exports = router;
-router.get("/", verifyToken, verifyAdmin, userController.getAllUsers);
-router.post("/doctor", verifyToken, verifyAdmin, userController.createDoctor);
+// ── Admin: assign doctor to patient ──────────────────────────────────────────
+// PUT /api/users/assign-doctor
+// Must be declared BEFORE /:id to avoid Express treating "assign-doctor" as an ID
 router.put("/assign-doctor", verifyToken, verifyAdmin, userController.assignDoctor);
+
+// ── User management ───────────────────────────────────────────────────────────
+router.get("/", verifyToken, verifyAdmin, userController.getAllUsers);
+router.get("/:id", verifyToken, userController.getUserById);
+router.put("/:id", verifyToken, userController.updateUser);
+router.delete("/:id", verifyToken, verifyAdmin, userController.deleteUser);
 
 module.exports = router;
