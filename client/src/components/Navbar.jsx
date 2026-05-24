@@ -39,6 +39,12 @@ function Navbar() {
                     </li>
                 )}
 
+                {user?.role === "admin" && (
+                    <li>
+                        <Link to="/audit-logs">Audit Logs</Link>
+                    </li>
+                )}
+
 
                 <li>
                     <Link to="/profile">Profile</Link>

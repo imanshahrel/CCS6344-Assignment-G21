@@ -9,6 +9,7 @@ import Appointments from "./pages/Appointments";
 import Profile from "./pages/Profile";
 import ManageUsers from "./pages/ManageUsers";
 import MedicalRecords from "./pages/MedicalRecords";
+import AuditLogs from "./pages/AuditLogs";
 
 
 function App() {
@@ -57,6 +58,15 @@ function App() {
           element={
             <ProtectedRoute>
               <MedicalRecords />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/audit-logs"
+          element={
+            <ProtectedRoute>
+              <AuditLogs />
             </ProtectedRoute>
           }
         />

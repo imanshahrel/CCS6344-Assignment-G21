@@ -229,3 +229,49 @@ button:hover,
 .auth-container h1 {
     margin-bottom: 10px;
 }
+
+.page-header {
+    margin-bottom: 24px;
+}
+
+.page-header p {
+    margin-top: 6px;
+    color: #6b7280;
+}
+
+.audit-log-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.audit-log-card {
+    margin-bottom: 0;
+}
+
+.audit-log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 14px;
+}
+
+.audit-log-header h3 {
+    margin: 0;
+}
+
+.role-badge {
+    padding: 6px 12px;
+    border-radius: 999px;
+    background-color: #e0ecff;
+    color: #2563eb;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+.audit-log-card p {
+    margin: 8px 0;
+    line-height: 1.5;
+}
