@@ -127,7 +127,7 @@ function MedicalRecords() {
                                 <h3>Patient: {record.patient_name}</h3>
                             )}
 
-                            <p><strong>Doctor:</strong> Dr. {record.doctor_name}</p>
+                            <p><strong>Doctor:</strong> {record.doctor_name}</p>
                             <p><strong>Specialization:</strong> {record.doctor_specialization}</p>
                             <p><strong>Date:</strong> {record.appointment_date?.slice(0, 10)}</p>
                             <p><strong>Reason:</strong> {record.appointment_reason || "No reason provided"}</p>
