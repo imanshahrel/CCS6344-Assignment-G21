@@ -174,7 +174,7 @@ function ManageUsers() {
                         value={doctorForm.doctor_specialization}
                         onChange={handleDoctorChange}
                     />
-                    <button type="submit">Add Doctor</button>
+                    <button className="btn btn-primary" type="submit">Add Doctor</button>
                 </form>
             </div>
 
@@ -209,7 +209,7 @@ function ManageUsers() {
                             </option>
                         ))}
                     </select>
-                    <button type="submit">Save Assignment</button>
+                    <button className="btn btn-primary" type="submit">Save Assignment</button>
                 </form>
             </div>
 
@@ -222,7 +222,7 @@ function ManageUsers() {
                         <p>Specialization: {doctor.doctor_specialization}</p>
                         <p>Email: {doctor.doctor_email}</p>
                         <p>Phone: {doctor.doctor_phone}</p>
-                        <button onClick={() => handleDeleteDoctor(doctor.doctor_id)}>
+                        <button className="btn btn-danger" onClick={() => handleDeleteDoctor(doctor.doctor_id)}>
                             Delete
                         </button>
                     </div>
@@ -243,7 +243,7 @@ function ManageUsers() {
                                 ? `Dr. ${user.assigned_doctor_name} (${user.assigned_doctor_specialization})`
                                 : "Not assigned yet"}
                         </p>
-                        <button onClick={() => handleDeleteUser(user.user_id)}>
+                        <button className="btn btn-danger" onClick={() => handleDeleteUser(user.user_id)}>
                             Delete
                         </button>
                     </div>

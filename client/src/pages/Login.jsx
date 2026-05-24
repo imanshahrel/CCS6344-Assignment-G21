@@ -64,7 +64,7 @@ function Login() {
                     onChange={handleChange}
                 />
 
-                <br />
+
                 
                 <input
                     type="password"
@@ -74,9 +74,9 @@ function Login() {
                     onChange={handleChange}
                 />
 
-                <br />
 
-                <button type="submit">Login</button>
+
+                <button className="btn btn-primary" type="submit">Login</button>
             </form>
 
             {message && <p className="message">{message}</p>}

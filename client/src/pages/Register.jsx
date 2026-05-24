@@ -59,7 +59,7 @@ function Register() {
                     onChange={handleChange}
                 />
 
-                <br />
+
 
                 <input
                     type="email"
@@ -69,7 +69,7 @@ function Register() {
                     onChange={handleChange}
                 />
 
-                <br />
+
 
                 <input
                     type="password"
@@ -79,7 +79,7 @@ function Register() {
                     onChange={handleChange}
                 />
 
-                <br />
+
 
                 <input
                     type="text"
@@ -89,9 +89,9 @@ function Register() {
                     onChange={handleChange}
                 />
                 
-                <br />
 
-                <button type="submit">Register</button>
+
+                <button className="btn btn-primary" type="submit">Register</button>
             </form>
 
             {message && <p className="message">{message}</p>}

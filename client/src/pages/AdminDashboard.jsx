@@ -4,18 +4,23 @@ function AdminDashboard() {
             <h1>Admin Dashboard</h1>
 
             <div className="dashboard-card">
+                <h3>Appointments</h3>
+                <p>View or update the status of appointments</p>
+            </div>
+
+            <div className="dashboard-card">
+                <h3>Medical Records</h3>
+                <p>Edit or delete completed medical records</p>
+            </div>
+
+            <div className="dashboard-card">
                 <h3>Manage Users</h3>
-                <p>Add, update, or remove patient and doctor accounts.</p>
+                <p>Add or delete doctor accounts, and assign doctor to patient</p>
             </div>
 
             <div className="dashboard-card">
-                <h3>Assign Doctors</h3>
-                <p>Assign doctors to patients or appointments</p>
-            </div>
-
-            <div className="dashboard-card">
-                <h3>System Overview</h3>
-                <p>Monitor clinic users, appointments, and system activity.</p>
+                <h3>Profile</h3>
+                <p>View profile details</p>
             </div>
         </div>
     );

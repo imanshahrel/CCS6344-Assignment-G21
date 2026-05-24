@@ -73,63 +73,69 @@ function BookAppointment() {
     return (
         <div className="page-container">
             <Navbar />
-            <h1>Book Appointment</h1>
-            {message && <p className="message">{message}</p>}
+            <div className="auth-container">
+                <h1>Book Appointment</h1>
+                {message && <p className="message">{message}</p>}
 
-            <div className="dashboard-card">
-                <form onSubmit={handleSubmit}>
+                <div className="dashboard-card">
+                    <form className="date-input" onSubmit={handleSubmit}>
 
-                    <div>
-                        <label>Select Doctor</label>
-                        <select
-                            name="doctor_id"
-                            value={formData.doctor_id}
-                            onChange={handleChange}
-                        >
-                            <option value="">-- Choose a doctor --</option>
-                            {doctors.map((doctor) => (
-                                <option key={doctor.doctor_id} value={doctor.doctor_id}>
-                                    Dr. {doctor.doctor_name} — {doctor.doctor_specialization}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                        <div className="form-group booking-group">
+                            <label>Select Doctor</label>
+                            <select
+                                name="doctor_id"
+                                value={formData.doctor_id}
+                                onChange={handleChange}
+                            >
+                                <option value="">-- Choose a doctor --</option>
+                                {doctors.map((doctor) => (
+                                    <option key={doctor.doctor_id} value={doctor.doctor_id}>
+                                        Dr. {doctor.doctor_name} — {doctor.doctor_specialization}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
 
-                    <div>
-                        <label>Appointment Date</label>
-                        <input
-                            type="date"
-                            name="appointment_date"
-                            value={formData.appointment_date}
-                            onChange={handleChange}
-                        />
-                    </div>
+                        <div className="form-group booking-group">
+                            <label>Appointment Date</label>
+                            <input
+                                type="date"
+                                name="appointment_date"
+                                value={formData.appointment_date}
+                                onChange={handleChange}
+                                className="date-input"
+                            />
+                        </div>
 
-                    <div>
-                        <label>Appointment Time</label>
-                        <input
-                            type="time"
-                            name="appointment_time"
-                            value={formData.appointment_time}
-                            onChange={handleChange}
-                        />
-                    </div>
+                        <div className="form-group booking-group">
+                            <label>Appointment Time</label>
+                            <input
+                                type="time"
+                                name="appointment_time"
+                                value={formData.appointment_time}
+                                onChange={handleChange}
+                                className="date-input"
+                            />
+                        </div>
 
-                    <div>
-                        <label>Reason for Visit (optional)</label>
-                        <textarea
-                            name="appointment_reason"
-                            placeholder="Enter reason for appointment"
-                            value={formData.appointment_reason}
-                            onChange={handleChange}
-                        ></textarea>
-                    </div>
+                        <div className="form-group booking-group">
+                            <label>Reason for Visit (optional)</label>
+                            <textarea
+                                rows="4"
+                                name="appointment_reason"
+                                placeholder="Enter reason for appointment"
+                                value={formData.appointment_reason}
+                                onChange={handleChange}
+                            ></textarea>
+                        </div>
 
-                    <button type="submit">Book Appointment</button>
-                </form>
+                        <button className="btn btn-primary" type="submit">Book Appointment</button>
+                    </form>
+                </div>
             </div>
 
             <Footer />
+
         </div>
     );
 }

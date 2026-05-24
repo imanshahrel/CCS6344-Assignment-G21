@@ -119,7 +119,7 @@ function MedicalRecords() {
 
             <div className="card-grid">
                 {records.length === 0 ? (
-                    <p>No medical records found.</p>
+                    <p className="message">No medical records found.</p>
                 ) : (
                     records.map((record) => (
                         <div className="dashboard-card" key={record.mr_id}>
@@ -154,16 +154,19 @@ function MedicalRecords() {
                                     />
 
                                     <textarea
+                                        rows="4"
                                         name="mr_notes"
                                         placeholder="Additional notes"
                                         value={editForm.mr_notes}
                                         onChange={handleEditChange}
                                     />
 
-                                    <button type="submit">Save Update</button>
-                                    <button type="button" onClick={() => setEditingId(null)}>
-                                        Cancel
-                                    </button>
+                                    <div className="card-actions">
+                                        <button className="btn btn-primary" type="submit">Save Update</button>
+                                        <button className="card-actions btn btn-secondary" type="button" onClick={() => setEditingId(null)}>
+                                            Cancel
+                                        </button>
+                                    </div>
                                 </form>
                             ) : (
                                 <>
@@ -175,15 +178,15 @@ function MedicalRecords() {
                                     )}
 
                                         {currentUser?.role === "admin" && (
-                                            <>
-                                                <button onClick={() => handleEditClick(record)}>
+                                            <div className="card-actions">
+                                                <button className="card-actions btn btn-primary" onClick={() => handleEditClick(record)}>
                                                     Edit Record
                                                 </button>
 
-                                                <button onClick={() => handleDeleteRecord(record.mr_id)}>
+                                                <button className="btn btn-danger" onClick={() => handleDeleteRecord(record.mr_id)}>
                                                     Delete Record
                                                 </button>
-                                            </>
+                                            </div>
                                         )}
                                 </>
                             )}

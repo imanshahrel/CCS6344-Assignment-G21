@@ -9,9 +9,9 @@ function Navbar() {
         navigate("/login");
     };
     return (
-        <nav>
+        <nav className="navbar">
             <h2>Clinic Management System</h2>
-            <ul>
+            <ul className="nav-links">
                 <li>
                     <Link to="/dashboard">Dashboard</Link>
                 </li>
@@ -27,6 +27,12 @@ function Navbar() {
                     <Link to="/appointments">Appointments</Link>
                 </li>
                 
+                {(user?.role === "admin" || user?.role === "patient") && (
+                    <li>
+                        <Link to="/medical-records">Medical Records</Link>
+                    </li>
+                )}
+
                 {user?.role === "admin" && (
                     <li>
                         <Link to="/manage-users">Manage Users</Link>
@@ -34,18 +40,12 @@ function Navbar() {
                 )}
 
 
-                {(user?.role === "admin" || user?.role === "patient") && (
-                    <li>
-                        <Link to="/medical-records">Medical Records</Link>
-                    </li>
-                )}
-
                 <li>
                     <Link to="/profile">Profile</Link>
                 </li>
 
                 <li>
-                    <button onClick={handleLogout}>Logout</button>
+                    <button className="btn btn-secondary" onClick={handleLogout}>Logout</button>
                 </li>
 
                 

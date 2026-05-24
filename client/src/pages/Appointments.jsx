@@ -59,7 +59,7 @@ function Appointments() {
 
             <div className="card-grid">
                 {appointments.length === 0 ? (
-                    <p>No appointments found.</p>
+                    <p className="message">No appointments found.</p>
                 ) : (
                     appointments.map((appointment) => (
                         <div className="dashboard-card" key={appointment.appointment_id}>
@@ -74,23 +74,26 @@ function Appointments() {
                             <p>Status: {appointment.appointment_status}</p>
 
                             {currentUser?.role === "admin" && (
-                                <>
-                                    <label>Update Status:</label>
-                                    <select
-                                        value={appointment.appointment_status}
-                                        onChange={(e) =>
-                                            handleStatusUpdate(
-                                                appointment.appointment_id,
-                                                e.target.value
-                                            )
-                                        }
-                                    >
-                                        <option value="pending">Pending</option>
-                                        <option value="approved">Approved</option>
-                                        <option value="cancelled">Cancelled</option>
-                                        <option value="completed">Completed</option>
-                                    </select>
-                                </>
+                                <div className="card-actions">
+                                    <div className="form-group">
+                                        <label>Update Status:</label>
+                                        <select
+                                            value={appointment.appointment_status}
+                                            onChange={(e) =>
+                                                handleStatusUpdate(
+                                                    appointment.appointment_id,
+                                                    e.target.value
+                                                )
+                                            }
+                                        >
+                                            <option value="pending">Pending</option>
+                                            <option value="approved">Approved</option>
+                                            <option value="cancelled">Cancelled</option>
+                                            <option value="completed">Completed</option>
+                                        </select>
+                                    </div>
+                                    
+                                </div>
                             )}
                         </div>
                     ))
