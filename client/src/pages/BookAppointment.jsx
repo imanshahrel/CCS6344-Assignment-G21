@@ -90,7 +90,7 @@ function BookAppointment() {
                                 <option value="">-- Choose a doctor --</option>
                                 {doctors.map((doctor) => (
                                     <option key={doctor.doctor_id} value={doctor.doctor_id}>
-                                        Dr. {doctor.doctor_name} — {doctor.doctor_specialization}
+                                         {doctor.doctor_name} — {doctor.doctor_specialization}
                                     </option>
                                 ))}
                             </select>
