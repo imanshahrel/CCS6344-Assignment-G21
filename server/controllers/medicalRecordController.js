@@ -11,6 +11,7 @@ exports.getAllMedicalRecords = async (req, res) => {
                 a.appointment_date,
                 a.appointment_time,
                 a.appointment_status,
+                a.appointment_reason,
                 u.user_name  AS patient_name,
                 d.doctor_name
             FROM medical_records mr

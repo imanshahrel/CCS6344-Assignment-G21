@@ -111,29 +111,89 @@ exports.createAppointment = async (req, res) => {
     }
 };
 
-// ── UPDATE APPOINTMENT (admin only) ──────────────────────────────────────────
+// ── UPDATE APPOINTMENT (Admin only) ───────────────────────────────────────────────────────
+// PUT /api/appointments/:id
 exports.updateAppointment = async (req, res) => {
-    const { appointment_status, appointment_date, appointment_time, doctor_id, appointment_reason } = req.body;
+    const {
+        appointment_status,
+        appointment_date,
+        appointment_time,
+        doctor_id,
+        appointment_reason
+    } = req.body;
 
     try {
-        const [result] = await db.query(
-            `UPDATE appointments 
-             SET appointment_status = ?, appointment_date = ?, appointment_time = ?, 
-                 doctor_id = ?, appointment_reason = ?
-             WHERE appointment_id = ?`,
-            [appointment_status, appointment_date, appointment_time, doctor_id, appointment_reason, req.params.id]
+        const [existingRows] = await db.query(
+            "SELECT * FROM appointments WHERE appointment_id = ?",
+            [req.params.id]
         );
 
-        if (result.affectedRows === 0) {
+        if (existingRows.length === 0) {
             return res.status(404).json({ message: "Appointment not found." });
+        }
+
+        const existingAppointment = existingRows[0];
+
+        const updatedStatus = appointment_status ?? existingAppointment.appointment_status;
+        const updatedDate = appointment_date ?? existingAppointment.appointment_date;
+        const updatedTime = appointment_time ?? existingAppointment.appointment_time;
+        const updatedDoctorId = doctor_id ?? existingAppointment.doctor_id;
+        const updatedReason = appointment_reason ?? existingAppointment.appointment_reason;
+
+        await db.query(
+            `UPDATE appointments
+             SET appointment_status = ?,
+                 appointment_date = ?,
+                 appointment_time = ?,
+                 doctor_id = ?,
+                 appointment_reason = ?
+             WHERE appointment_id = ?`,
+            [
+                updatedStatus,
+                updatedDate,
+                updatedTime,
+                updatedDoctorId,
+                updatedReason,
+                req.params.id
+            ]
+        );
+
+        // If appointment is completed, create ONE medical record only if it does not exist yet
+        if (updatedStatus === "completed") {
+            const [existingRecordRows] = await db.query(
+                "SELECT * FROM medical_records WHERE appointment_id = ?",
+                [req.params.id]
+            );
+
+            if (existingRecordRows.length === 0) {
+                await db.query(
+                    `INSERT INTO medical_records
+                     (appointment_id, mr_diagnosis, mr_treatment, mr_notes)
+                     VALUES (?, ?, ?, ?)`,
+                    [
+                        req.params.id,
+                        "Pending diagnosis",
+                        "Pending treatment",
+                        "Appointment marked as completed. Admin should update this medical record."
+                    ]
+                );
+            }
         }
 
         const ip = req.ip || req.socket.remoteAddress;
         await logAction(req.user.id, `UPDATE_APPOINTMENT_${req.params.id}`, ip);
 
-        res.status(200).json({ message: "Appointment updated successfully." });
+        res.status(200).json({
+            message:
+                updatedStatus === "completed"
+                    ? "Appointment completed. Medical record is ready for update."
+                    : "Appointment updated successfully."
+        });
     } catch (error) {
-        res.status(500).json({ message: "Server error.", error: error.message });
+        res.status(500).json({
+            message: "Server error.",
+            error: error.message
+        });
     }
 };
 

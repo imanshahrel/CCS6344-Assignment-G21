@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import AdminDashboard from "./AdminDashboard";
-import DoctorDashboard from "./DoctorDashboard";
 import PatientDashboard from "./PatientDashboard";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -27,12 +26,10 @@ function Dashboard() {
             <p>Welcome, {user?.name}</p>
             <p>Role: {role}</p>
 
-            <button onClick={handleLogout}>Logout</button>
 
             <hr />
             
             {role === "admin" && <AdminDashboard />}
-            {role === "doctor" && <DoctorDashboard />}
             {role === "patient" && <PatientDashboard />}
 
             {!role && (

@@ -26,9 +26,6 @@ function Navbar() {
                 <li>
                     <Link to="/appointments">Appointments</Link>
                 </li>
-                <li>
-                    <Link to="/profile">Profile</Link>
-                </li>
                 
                 {user?.role === "admin" && (
                     <li>
@@ -37,11 +34,15 @@ function Navbar() {
                 )}
 
 
-                {(user?.role === "doctor" || user?.role === "patient") && (
+                {(user?.role === "admin" || user?.role === "patient") && (
                     <li>
                         <Link to="/medical-records">Medical Records</Link>
                     </li>
                 )}
+
+                <li>
+                    <Link to="/profile">Profile</Link>
+                </li>
 
                 <li>
                     <button onClick={handleLogout}>Logout</button>

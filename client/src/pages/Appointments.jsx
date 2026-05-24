@@ -6,6 +6,7 @@ import Footer from "../components/Footer";
 function Appointments() {
     const token = localStorage.getItem("token");
     const currentUser = JSON.parse(localStorage.getItem("user"));
+
     const [appointments, setAppointments] = useState([]);
     const [message, setMessage] = useState("");
 
@@ -23,6 +24,29 @@ function Appointments() {
     useEffect(() => {
         fetchAppointments();
     }, [fetchAppointments]);
+
+    const handleStatusUpdate = async (appointmentId, status) => {
+        try {
+            const res = await axios.put(
+                `http://localhost:5001/api/appointments/${appointmentId}`,
+                { appointment_status: status },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            setMessage(res.data.message);
+
+            fetchAppointments(); // refresh list
+        } catch (error) {
+            setMessage(
+                error.response?.data?.message ||
+                "Failed to update appointment status."
+            );
+        }
+    };
 
     return (
         <div className="page-container">
@@ -46,7 +70,28 @@ function Appointments() {
                             <p>Specialization: {appointment.doctor_specialization}</p>
                             <p>Date: {appointment.appointment_date?.slice(0, 10)}</p>
                             <p>Time: {appointment.appointment_time}</p>
+                            <p>Reason: {appointment.appointment_reason || "No reason provided"}</p>
                             <p>Status: {appointment.appointment_status}</p>
+
+                            {currentUser?.role === "admin" && (
+                                <>
+                                    <label>Update Status:</label>
+                                    <select
+                                        value={appointment.appointment_status}
+                                        onChange={(e) =>
+                                            handleStatusUpdate(
+                                                appointment.appointment_id,
+                                                e.target.value
+                                            )
+                                        }
+                                    >
+                                        <option value="pending">Pending</option>
+                                        <option value="approved">Approved</option>
+                                        <option value="cancelled">Cancelled</option>
+                                        <option value="completed">Completed</option>
+                                    </select>
+                                </>
+                            )}
                         </div>
                     ))
                 )}
