@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS appointments (
     appointment_date    DATE         NOT NULL,
     appointment_time    TIME         NOT NULL,
     appointment_status  VARCHAR(50)  NOT NULL DEFAULT 'pending',
+    appointment_reason  TEXT         NULL,
     appointment_create_at DATETIME   NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_appt_patient

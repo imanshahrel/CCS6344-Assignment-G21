@@ -8,12 +8,12 @@ USE clinic_db;
 -- admin password : Admin@123
 -- patient password : Password123
 INSERT INTO users (user_name, user_email, user_password, user_role, user_phone) VALUES
-('Admin Clinic',    'admin@clinic.com',   '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin',   '0123456789'),
-('Ahmad Razif',     'ahmad@email.com',    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'patient', '0112345678'),
-('Nurul Aisyah',    'nurul@email.com',    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'patient', '0123456780'),
-('Raj Kumar',       'raj@email.com',      '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'patient', '0134567890'),
-('Mei Ling',        'meiling@email.com',  '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'patient', '0145678901'),
-('Hafiz Zulkifli',  'hafiz@email.com',    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'patient', '0156789012');
+('Admin Clinic',    'admin@clinic.com',   '$2b$10$PKvdYuDoWklvg//Uh5iLHOw0S48zNBNZ7ZR50qW2AOGl1IyG1dcW.', 'admin',   '0123456789'),
+('Ahmad Razif',     'ahmad@email.com',    '$2b$10$XvXtRJ1FDJS3AJ9TR99wou.uLaeMCkt0iALjCI0EcE1kwGWSkTomy', 'patient', '0112345678'),
+('Nurul Aisyah',    'nurul@email.com',    '$2b$10$XvXtRJ1FDJS3AJ9TR99wou.uLaeMCkt0iALjCI0EcE1kwGWSkTomy', 'patient', '0123456780'),
+('Raj Kumar',       'raj@email.com',      '$2b$10$XvXtRJ1FDJS3AJ9TR99wou.uLaeMCkt0iALjCI0EcE1kwGWSkTomy', 'patient', '0134567890'),
+('Mei Ling',        'meiling@email.com',  '$2b$10$XvXtRJ1FDJS3AJ9TR99wou.uLaeMCkt0iALjCI0EcE1kwGWSkTomy', 'patient', '0145678901'),
+('Hafiz Zulkifli',  'hafiz@email.com',    '$2b$10$XvXtRJ1FDJS3AJ9TR99wou.uLaeMCkt0iALjCI0EcE1kwGWSkTomy', 'patient', '0156789012');
 
 -- ─────────────────────────────────────────────
 -- DOCTORS
