@@ -192,7 +192,7 @@ function ManageUsers() {
                             <option key={patient.user_id} value={patient.user_id}>
                                 {patient.user_name} — {patient.user_email}
                                 {patient.assigned_doctor_name
-                                    ? ` (currently: Dr. ${patient.assigned_doctor_name})`
+                                    ? ` (currently: ${patient.assigned_doctor_name})`
                                     : " (unassigned)"}
                             </option>
                         ))}
@@ -205,7 +205,7 @@ function ManageUsers() {
                         <option value="">Unassign / No doctor</option>
                         {doctors.map((doctor) => (
                             <option key={doctor.doctor_id} value={doctor.doctor_id}>
-                                Dr. {doctor.doctor_name} — {doctor.doctor_specialization}
+                                {doctor.doctor_name} — {doctor.doctor_specialization}
                             </option>
                         ))}
                     </select>
@@ -240,7 +240,7 @@ function ManageUsers() {
                         <p>
                             Assigned Doctor:{" "}
                             {user.assigned_doctor_name
-                                ? `Dr. ${user.assigned_doctor_name} (${user.assigned_doctor_specialization})`
+                                ? `${user.assigned_doctor_name} (${user.assigned_doctor_specialization})`
                                 : "Not assigned yet"}
                         </p>
                         <button className="btn btn-danger" onClick={() => handleDeleteUser(user.user_id)}>

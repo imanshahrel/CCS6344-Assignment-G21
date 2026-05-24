@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
     user_password   VARCHAR(255)  NOT NULL,          -- bcrypt hash (needs >50 chars)
     user_role       VARCHAR(50)   NOT NULL DEFAULT 'patient',
     user_phone      VARCHAR(50)   NOT NULL,
+    doctor_id       INT           NULL,
     user_create_at  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
