@@ -13,7 +13,8 @@ exports.getAllMedicalRecords = async (req, res) => {
                 a.appointment_status,
                 a.appointment_reason,
                 u.user_name  AS patient_name,
-                d.doctor_name
+                d.doctor_name,
+                d.doctor_specialization
             FROM medical_records mr
             JOIN appointments a ON mr.appointment_id = a.appointment_id
             JOIN users        u ON a.patient_id       = u.user_id
