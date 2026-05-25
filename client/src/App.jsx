@@ -1,0 +1,78 @@
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
+import BookAppointment from "./pages/BookAppointment";
+import Appointments from "./pages/Appointments";
+import Profile from "./pages/Profile";
+import ManageUsers from "./pages/ManageUsers";
+import MedicalRecords from "./pages/MedicalRecords";
+import AuditLogs from "./pages/AuditLogs";
+
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" replace/>}/>
+
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        <Route
+          path="/dashboard"
+          element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
+        />
+        
+        <Route
+          path="/book-appointment"
+          element={
+            <ProtectedRoute><BookAppointment/></ProtectedRoute>}
+        />
+
+        <Route
+          path="/appointments"
+          element={
+            <ProtectedRoute><Appointments/></ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute><Profile /></ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/manage-users"
+          element={
+            <ProtectedRoute><ManageUsers /></ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/medical-records"
+          element={
+            <ProtectedRoute>
+              <MedicalRecords />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/audit-logs"
+          element={
+            <ProtectedRoute>
+              <AuditLogs />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;

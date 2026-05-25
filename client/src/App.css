@@ -1,0 +1,277 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f5f7fb;
+    color: #333;
+}
+
+h1,
+h2,
+h3 {
+    color: #222;
+    margin-top: 0;
+}
+
+.page-container {
+    min-height: 100vh;
+    padding: 24px 48px;
+}
+
+.navbar,
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 40px;
+    margin-bottom: 28px;
+    background-color: white;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+nav h2 {
+    margin: 0;
+}
+
+nav ul {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+nav a {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.dashboard-card,
+.auth-container {
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+}
+
+.dashboard-card {
+    margin-bottom: 20px;
+}
+
+.auth-container {
+    max-width: 520px;
+    margin: 80px auto;
+}
+
+.auth-container form,
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 15px;
+    background-color: white;
+}
+
+textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+    cursor: pointer;
+}
+
+button,
+.btn {
+    border: none;
+    border-radius: 8px;
+    padding: 11px 18px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    background-color: #2563eb;
+    color: white;
+    transition: 0.2s ease;
+    margin-right: 8px;
+    margin-top: 8px;
+}
+
+button:hover,
+.btn:hover {
+    opacity: 0.9;
+}
+
+.btn-primary {
+    background-color: #2563eb;
+}
+
+.btn-secondary {
+    background-color: #6b7280;
+}
+
+.btn-danger {
+    background-color: #dc2626;
+}
+
+.message {
+    margin: 14px 0;
+    padding: 12px 14px;
+    background-color: #e9f5ff;
+    border: 1px solid #b6e0fe;
+    border-radius: 8px;
+}
+
+.footer {
+    margin-top: 40px;
+    padding: 18px;
+    text-align: center;
+    color: #555;
+}
+
+@media (max-width: 768px) {
+    .page-container {
+        padding: 18px;
+    }
+
+    nav {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 18px;
+    }
+
+    nav ul {
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+
+    .auth-container {
+        margin: 40px 18px;
+    }
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.date-input {
+    width: 100%;
+}
+
+.card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.card-actions button {
+    margin: 0;
+}
+
+.dashboard-card {
+    transition: 0.2s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+}
+
+.page-container h1 {
+    margin-bottom: 24px;
+}
+
+.booking-group {
+    margin-bottom: 18px;
+}
+
+.booking-group label {
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.admin-form {
+    margin-top: 18px;
+}
+
+.admin-form button {
+    margin-top: 10px;
+}
+
+.auth-container h1 {
+    margin-bottom: 10px;
+}
+
+.page-header {
+    margin-bottom: 24px;
+}
+
+.page-header p {
+    margin-top: 6px;
+    color: #6b7280;
+}
+
+.audit-log-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.audit-log-card {
+    margin-bottom: 0;
+}
+
+.audit-log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 14px;
+}
+
+.audit-log-header h3 {
+    margin: 0;
+}
+
+.role-badge {
+    padding: 6px 12px;
+    border-radius: 999px;
+    background-color: #e0ecff;
+    color: #2563eb;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+.audit-log-card p {
+    margin: 8px 0;
+    line-height: 1.5;
+}
