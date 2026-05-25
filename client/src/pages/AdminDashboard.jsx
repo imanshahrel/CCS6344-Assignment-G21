@@ -19,6 +19,11 @@ function AdminDashboard() {
             </div>
 
             <div className="dashboard-card">
+                <h3>Audit Logs</h3>
+                <p>User and system activities</p>
+            </div>
+
+            <div className="dashboard-card">
                 <h3>Profile</h3>
                 <p>View profile details</p>
             </div>
