@@ -2,9 +2,12 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: >
   Clinic Management System - Secure AWS Infrastructure
   CCS6344 T2610 Assignment 2
-  Provisions VPC, subnets, EC2, RDS, Security Groups, NACLs,
-  IAM roles, S3, ALB, Auto Scaling, and CloudWatch alarms.
-  Note: Secrets Manager secret is created manually due to Academy permissions.
+  Adapted for AWS Academy sandbox restrictions:
+  - Uses pre-created LabRole and LabInstanceProfile (no IAM creation)
+  - RDS Single-AZ (Multi-AZ not supported in Academy)
+  - No Secrets Manager (not available in Academy)
+  - AES256 S3 encryption (KMS list-only in Academy)
+  - Credentials managed via .env file on EC2
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PARAMETERS
@@ -86,7 +89,7 @@ Resources:
       InternetGatewayId: !Ref InternetGateway
 
   # ── 3. Subnets ────────────────────────────────────────────────────────────
-
+  # Public subnet — hosts EC2 and NAT Gateway
   PublicSubnet:
     Type: AWS::EC2::Subnet
     Properties:
@@ -98,6 +101,7 @@ Resources:
         - Key: Name
           Value: clinic-public-subnet
 
+  # Private subnet 1 — hosts primary RDS instance (us-east-1a)
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -108,6 +112,7 @@ Resources:
         - Key: Name
           Value: clinic-private-subnet-1
 
+  # Private subnet 2 — required by RDS subnet group (us-east-1b)
   PrivateSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
@@ -383,48 +388,8 @@ Resources:
         - Key: Name
           Value: SG-DB
 
-  # ── 8. IAM Role for EC2 ───────────────────────────────────────────────────
-  EC2InstanceRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: clinic-ec2-role
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: ec2.amazonaws.com
-            Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
-      Policies:
-        - PolicyName: clinic-secrets-readonly
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - secretsmanager:GetSecretValue
-                  - secretsmanager:DescribeSecret
-                Resource: "*"
-        - PolicyName: clinic-s3-backup-access
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:PutObject
-                  - s3:GetObject
-                Resource: !Sub "${BackupBucket.Arn}/*"
-
-  EC2InstanceProfile:
-    Type: AWS::IAM::InstanceProfile
-    Properties:
-      InstanceProfileName: clinic-ec2-profile
-      Roles:
-        - !Ref EC2InstanceRole
-
-  # ── 9. S3 Bucket for Backups ─────────────────────────────────────────────
+  # ── 8. S3 Bucket for Backups ─────────────────────────────────────────────
+  # AES256 used instead of KMS (KMS is list-only in Academy)
   BackupBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -434,7 +399,7 @@ Resources:
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
-              SSEAlgorithm: aws:kms
+              SSEAlgorithm: AES256
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -444,11 +409,11 @@ Resources:
         - Key: Name
           Value: clinic-backup-bucket
 
-  # ── 10. RDS Subnet Group ──────────────────────────────────────────────────
+  # ── 9. RDS Subnet Group ───────────────────────────────────────────────────
   RDSSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
-      DBSubnetGroupDescription: Subnet group for Clinic RDS (Multi-AZ requires 2 AZs)
+      DBSubnetGroupDescription: Subnet group for Clinic RDS instance
       SubnetIds:
         - !Ref PrivateSubnet1
         - !Ref PrivateSubnet2
@@ -456,7 +421,8 @@ Resources:
         - Key: Name
           Value: clinic-rds-subnet-group
 
-  # ── 11. RDS MySQL Instance ────────────────────────────────────────────────
+  # ── 10. RDS MySQL Instance ────────────────────────────────────────────────
+  # Single-AZ only — Multi-AZ not supported in Academy sandbox
   ClinicRDS:
     Type: AWS::RDS::DBInstance
     DeletionPolicy: Snapshot
@@ -471,18 +437,19 @@ Resources:
       DBSubnetGroupName: !Ref RDSSubnetGroup
       VPCSecurityGroups:
         - !Ref RDSSecurityGroup
-      MultiAZ: true
+      MultiAZ: false
       StorageType: gp2
       AllocatedStorage: "20"
       StorageEncrypted: true
       BackupRetentionPeriod: 7
       DeletionProtection: false
       PubliclyAccessible: false
+      MonitoringInterval: 0
       Tags:
         - Key: Name
           Value: clinic-rds
 
-  # ── 12. Application Load Balancer ─────────────────────────────────────────
+  # ── 11. Application Load Balancer ─────────────────────────────────────────
   ClinicALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
@@ -525,7 +492,8 @@ Resources:
         - Type: forward
           TargetGroupArn: !Ref ClinicTargetGroup
 
-  # ── 13. Auto Scaling Group ────────────────────────────────────────────────
+  # ── 12. Launch Template and Auto Scaling Group ────────────────────────────
+  # Uses pre-created LabInstanceProfile — cannot create IAM resources in Academy
   ClinicLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
@@ -535,7 +503,7 @@ Resources:
         InstanceType: !Ref EC2InstanceType
         KeyName: !Ref KeyPairName
         IamInstanceProfile:
-          Arn: !GetAtt EC2InstanceProfile.Arn
+          Name: LabInstanceProfile
         SecurityGroupIds:
           - !Ref EC2SecurityGroup
         UserData:
@@ -548,7 +516,8 @@ Resources:
             git clone -b ${GitHubBranch} ${GitHubRepo} app
             cd app/server
             npm install
-            echo "Bootstrap complete. SSH in to configure and start the server."
+            chown -R ec2-user:ec2-user /home/ec2-user/app
+            echo "Bootstrap complete. SSH in to create .env and start the server."
         TagSpecifications:
           - ResourceType: instance
             Tags:
@@ -574,7 +543,7 @@ Resources:
           Value: clinic-asg-instance
           PropagateAtLaunch: true
 
-  # ── 14. CloudWatch Alarms ─────────────────────────────────────────────────
+  # ── 13. CloudWatch Alarms ─────────────────────────────────────────────────
   EC2CPUAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -625,13 +594,9 @@ Outputs:
     Value: !GetAtt ClinicALB.DNSName
 
   RDSEndpoint:
-    Description: RDS endpoint - copy this into Secrets Manager after stack creation
+    Description: RDS endpoint - copy this into your .env file on EC2
     Value: !GetAtt ClinicRDS.Endpoint.Address
 
   BackupBucketName:
     Description: S3 bucket name for backups
     Value: !Ref BackupBucket
-
-  EC2RoleName:
-    Description: IAM role attached to EC2
-    Value: !Ref EC2InstanceRole
