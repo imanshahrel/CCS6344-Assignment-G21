@@ -3,10 +3,11 @@ Description: >
   Clinic Management System - Secure AWS Infrastructure
   CCS6344 T2610 Assignment 2
   Provisions VPC, subnets, EC2, RDS, Security Groups, NACLs,
-  IAM roles, Secrets Manager, S3, and CloudWatch alarms.
+  IAM roles, S3, ALB, Auto Scaling, and CloudWatch alarms.
+  Note: Secrets Manager secret is created manually due to Academy permissions.
 
 # ─────────────────────────────────────────────────────────────────────────────
-# PARAMETERS — values you fill in when deploying the stack
+# PARAMETERS
 # ─────────────────────────────────────────────────────────────────────────────
 Parameters:
 
@@ -34,12 +35,6 @@ Parameters:
     Type: String
     Description: Name of the MySQL database
     Default: clinic_db
-
-  JWTSecret:
-    Type: String
-    Description: Secret key used to sign JWT tokens (min 32 characters)
-    NoEcho: true
-    MinLength: 32
 
   EC2InstanceType:
     Type: String
@@ -92,7 +87,6 @@ Resources:
 
   # ── 3. Subnets ────────────────────────────────────────────────────────────
 
-  # Public Subnet — us-east-1a — hosts EC2 and NAT Gateway
   PublicSubnet:
     Type: AWS::EC2::Subnet
     Properties:
@@ -104,7 +98,6 @@ Resources:
         - Key: Name
           Value: clinic-public-subnet
 
-  # Private Subnet 1 — us-east-1a — hosts primary RDS instance
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -115,7 +108,6 @@ Resources:
         - Key: Name
           Value: clinic-private-subnet-1
 
-  # Private Subnet 2 — us-east-1b — hosts RDS standby (Multi-AZ)
   PrivateSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
@@ -127,7 +119,6 @@ Resources:
           Value: clinic-private-subnet-2
 
   # ── 4. NAT Gateway ────────────────────────────────────────────────────────
-  # Allows EC2 in public subnet to reach internet for outbound requests
   NATGatewayEIP:
     Type: AWS::EC2::EIP
     DependsOn: AttachInternetGateway
@@ -144,8 +135,6 @@ Resources:
           Value: clinic-nat-gateway
 
   # ── 5. Route Tables ───────────────────────────────────────────────────────
-
-  # Public route table — routes internet traffic via IGW
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -168,7 +157,6 @@ Resources:
       SubnetId: !Ref PublicSubnet
       RouteTableId: !Ref PublicRouteTable
 
-  # Private route table — routes outbound traffic via NAT Gateway
   PrivateRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -197,8 +185,6 @@ Resources:
       RouteTableId: !Ref PrivateRouteTable
 
   # ── 6. Network ACLs ───────────────────────────────────────────────────────
-
-  # Public NACL — allows HTTP, HTTPS, SSH, and ephemeral ports
   PublicNACL:
     Type: AWS::EC2::NetworkAcl
     Properties:
@@ -207,7 +193,6 @@ Resources:
         - Key: Name
           Value: clinic-public-nacl
 
-  # Inbound rules
   PublicNACLInboundHTTPS:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
@@ -260,7 +245,6 @@ Resources:
         From: 1024
         To: 65535
 
-  # Outbound rules
   PublicNACLOutboundAll:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
@@ -277,7 +261,6 @@ Resources:
       SubnetId: !Ref PublicSubnet
       NetworkAclId: !Ref PublicNACL
 
-  # Private NACL — only allows MySQL from VPC and return traffic
   PrivateNACL:
     Type: AWS::EC2::NetworkAcl
     Properties:
@@ -335,8 +318,6 @@ Resources:
       NetworkAclId: !Ref PrivateNACL
 
   # ── 7. Security Groups ────────────────────────────────────────────────────
-
-  # ALB Security Group — accepts HTTPS and HTTP from internet
   ALBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -357,7 +338,6 @@ Resources:
         - Key: Name
           Value: SG-ALB
 
-  # EC2 Security Group (SG-Web) — accepts traffic from ALB only
   EC2SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -388,7 +368,6 @@ Resources:
         - Key: Name
           Value: SG-Web
 
-  # RDS Security Group (SG-DB) — accepts MySQL from EC2 only
   RDSSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -405,8 +384,6 @@ Resources:
           Value: SG-DB
 
   # ── 8. IAM Role for EC2 ───────────────────────────────────────────────────
-  # Allows EC2 to access Secrets Manager and CloudWatch without credentials
-
   EC2InstanceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -421,7 +398,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
       Policies:
-        - PolicyName: clinic-secrets-access
+        - PolicyName: clinic-secrets-readonly
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -429,7 +406,7 @@ Resources:
                 Action:
                   - secretsmanager:GetSecretValue
                   - secretsmanager:DescribeSecret
-                Resource: !Ref ClinicAppSecret
+                Resource: "*"
         - PolicyName: clinic-s3-backup-access
           PolicyDocument:
             Version: "2012-10-17"
@@ -447,28 +424,7 @@ Resources:
       Roles:
         - !Ref EC2InstanceRole
 
-  # ── 9. Secrets Manager ────────────────────────────────────────────────────
-  # Stores all application secrets — replaces .env file
-
-  ClinicAppSecret:
-    Type: AWS::SecretsManager::Secret
-    Properties:
-      Name: clinic-app-secrets
-      Description: Database credentials and JWT secret for the Clinic Management System
-      SecretString: !Sub |
-        {
-          "DB_HOST": "placeholder",
-          "DB_USER": "${DBUsername}",
-          "DB_PASSWORD": "${DBPassword}",
-          "DB_NAME": "${DBName}",
-          "JWT_SECRET": "${JWTSecret}",
-          "PORT": "5001"
-        }
-      Tags:
-        - Key: Name
-          Value: clinic-app-secrets
-
-  # ── 10. S3 Bucket for Backups ─────────────────────────────────────────────
+  # ── 9. S3 Bucket for Backups ─────────────────────────────────────────────
   BackupBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -488,11 +444,11 @@ Resources:
         - Key: Name
           Value: clinic-backup-bucket
 
-  # ── 11. RDS Subnet Group ──────────────────────────────────────────────────
+  # ── 10. RDS Subnet Group ──────────────────────────────────────────────────
   RDSSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
-      DBSubnetGroupDescription: Subnet group for Clinic RDS instance (Multi-AZ requires 2 AZs)
+      DBSubnetGroupDescription: Subnet group for Clinic RDS (Multi-AZ requires 2 AZs)
       SubnetIds:
         - !Ref PrivateSubnet1
         - !Ref PrivateSubnet2
@@ -500,7 +456,7 @@ Resources:
         - Key: Name
           Value: clinic-rds-subnet-group
 
-  # ── 12. RDS MySQL Instance ────────────────────────────────────────────────
+  # ── 11. RDS MySQL Instance ────────────────────────────────────────────────
   ClinicRDS:
     Type: AWS::RDS::DBInstance
     DeletionPolicy: Snapshot
@@ -526,7 +482,7 @@ Resources:
         - Key: Name
           Value: clinic-rds
 
-  # ── 13. Application Load Balancer ─────────────────────────────────────────
+  # ── 12. Application Load Balancer ─────────────────────────────────────────
   ClinicALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
@@ -535,14 +491,13 @@ Resources:
       Type: application
       Subnets:
         - !Ref PublicSubnet
-        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
       SecurityGroups:
         - !Ref ALBSecurityGroup
       Tags:
         - Key: Name
           Value: clinic-alb
 
-  # Target group — points to EC2 on port 5001
   ClinicTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
@@ -560,7 +515,6 @@ Resources:
         - Key: Name
           Value: clinic-target-group
 
-  # HTTP listener — forwards to target group
   ALBListenerHTTP:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
@@ -571,7 +525,7 @@ Resources:
         - Type: forward
           TargetGroupArn: !Ref ClinicTargetGroup
 
-  # ── 14. Auto Scaling Group ────────────────────────────────────────────────
+  # ── 13. Auto Scaling Group ────────────────────────────────────────────────
   ClinicLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
@@ -594,7 +548,7 @@ Resources:
             git clone -b ${GitHubBranch} ${GitHubRepo} app
             cd app/server
             npm install
-            echo "App installed. SSH in to start the server."
+            echo "Bootstrap complete. SSH in to configure and start the server."
         TagSpecifications:
           - ResourceType: instance
             Tags:
@@ -620,9 +574,7 @@ Resources:
           Value: clinic-asg-instance
           PropagateAtLaunch: true
 
-  # ── 15. CloudWatch Alarms ─────────────────────────────────────────────────
-
-  # Alarm for high CPU usage on EC2
+  # ── 14. CloudWatch Alarms ─────────────────────────────────────────────────
   EC2CPUAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -639,7 +591,6 @@ Resources:
         - Name: AutoScalingGroupName
           Value: !Ref ClinicAutoScalingGroup
 
-  # Alarm for RDS high database connections
   RDSConnectionsAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -657,7 +608,7 @@ Resources:
           Value: !Ref ClinicRDS
 
 # ─────────────────────────────────────────────────────────────────────────────
-# OUTPUTS — values shown after stack creation, useful for next steps
+# OUTPUTS
 # ─────────────────────────────────────────────────────────────────────────────
 Outputs:
 
@@ -670,17 +621,17 @@ Outputs:
     Value: !Ref PublicSubnet
 
   ALBDNSName:
-    Description: Application Load Balancer DNS Name - use this to access the app
+    Description: ALB DNS Name - use this to access the app
     Value: !GetAtt ClinicALB.DNSName
 
   RDSEndpoint:
-    Description: RDS MySQL endpoint - update in Secrets Manager after stack creation
+    Description: RDS endpoint - copy this into Secrets Manager after stack creation
     Value: !GetAtt ClinicRDS.Endpoint.Address
-
-  SecretARN:
-    Description: ARN of the Secrets Manager secret
-    Value: !Ref ClinicAppSecret
 
   BackupBucketName:
     Description: S3 bucket name for backups
     Value: !Ref BackupBucket
+
+  EC2RoleName:
+    Description: IAM role attached to EC2
+    Value: !Ref EC2InstanceRole
